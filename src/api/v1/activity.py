@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.deps import get_auth
-from src.db.session import db
+from src.db.session import get_db
 from src.schemas.activity import ActivityCreate, ActivityOut
 from src.services.activity import get_activity_service
 
@@ -11,7 +11,7 @@ router = APIRouter(dependencies=[Depends(get_auth)])
 
 @router.post("/create", response_model=ActivityOut)
 async def create_activity(
-    activity_data: ActivityCreate, db: AsyncSession = Depends(db)
+        activity_data: ActivityCreate, db: AsyncSession = Depends(get_db)
 ) -> ActivityOut:
     """
     Создание новой деятельности
@@ -26,9 +26,9 @@ async def create_activity(
 
 @router.get("/get_by_name_and_parent_name", response_model=ActivityOut)
 async def get_activity_by_name_and_parent_name(
-    name: str,
-    parent_name: str = "",
-    db: AsyncSession = Depends(db),
+        name: str,
+        parent_name: str = "",
+        db: AsyncSession = Depends(get_db),
 ) -> ActivityOut:
     """
     Получение деятельности по названию и имени родителя
@@ -46,8 +46,8 @@ async def get_activity_by_name_and_parent_name(
 
 @router.get("/{activity_id}/subtree-ids", response_model=list[int])
 async def get_activity_subtree(
-    activity_id: int,
-    db: AsyncSession = Depends(db),
+        activity_id: int,
+        db: AsyncSession = Depends(get_db),
 ) -> list[int]:
     """
     Получение списка ID всех дочерних видов деятельности

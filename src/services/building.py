@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import src.crud.building as crud
+import src.crud.building as crud_buil
 
-from src.models.building import Building
+from src.models import Building
 
 
 class BuildingService:
@@ -13,21 +13,21 @@ class BuildingService:
         self, address: str, latitude: float, longitude: float
     ) -> Building:
         """Создать новое здание"""
-        return await crud.create_building(self.db, address, latitude, longitude)
+        return await crud_buil.create_building(self.db, address, latitude, longitude)
 
     async def get_building_by_id(self, building_id: int) -> Building | None:
         """Получить здание по ID"""
-        return await crud.get_building_by_id(self.db, building_id)
+        return await crud_buil.get_building_by_id(self.db, building_id)
 
     async def get_building_by_address(self, address: str) -> Building | None:
         """Получить здание по адресу"""
-        return await crud.get_building_by_address(self.db, address)
+        return await crud_buil.get_building_by_address(self.db, address)
 
     async def list_buildings(
         self, q: str = "", limit: int = 15, offset: int = 0
     ) -> list[Building]:
         """Получить список зданий"""
-        return await crud.list_buildings(self.db, q=q, limit=limit, offset=offset)
+        return await crud_buil.list_buildings(self.db, q=q, limit=limit, offset=offset)
 
     async def get_or_create_building(
         self, address: str, latitude: float, longitude: float

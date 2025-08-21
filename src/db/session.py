@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
 from src.core.config import settings
 
 engine = create_async_engine(settings.DB_URL_ASYNC)
@@ -11,7 +12,7 @@ async_session = async_sessionmaker(
 
 
 @asynccontextmanager
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Контекстный менеджер для работы с асинхронной сессией."""
     session = async_session()
     try:

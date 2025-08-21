@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any
 
-from src.db.session import get_session
+from src.db.session import get_db
 from src.services.building import get_building_service, BuildingService
 
 from src.services.activity import get_activity_service, ActivityService
@@ -30,6 +30,8 @@ ACTIVITIES = [
     {"name": "Финансы", "parent": "Услуги"},
     {"name": "Розничная торговля", "parent": None},
 ]
+
+
 #
 # ORGANIZATIONS = [
 #     {"name": "Вкусно и точка", "building_idx": 0, "phones": ["+79161234567"]},
@@ -124,11 +126,11 @@ async def seed_activities(service: ActivityService):
 
 async def main():
     """Основная функция заполнения данных"""
-    async with get_session() as session:
+    async with get_db() as session:
         # Инициализируем сервисы
         building_service = get_building_service(session)
         activity_service = get_activity_service(session)
-        # org_service = get_organization_service(db)
+        # org_service = get_organization_service(session)
 
         # Заполняем данные
         await seed_buildings(building_service)
