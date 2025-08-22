@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -11,15 +10,14 @@ async_session = async_sessionmaker(
 )
 
 
-@asynccontextmanager
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Контекстный менеджер для работы с асинхронной сессией."""
+    """Генератор асинхронных сессий для FastAPI."""
     session = async_session()
     try:
         yield session
         await session.commit()
-    except Exception as e:
+    except Exception as _:
         await session.rollback()
-        raise  # Пробрасываем исключение дальше для обработки в обработчиках
+        raise
     finally:
         await session.close()

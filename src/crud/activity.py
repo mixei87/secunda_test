@@ -1,11 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from src.models.activity import Activity
 
 
 async def create_activity(
-    session: AsyncSession, name: str, parent_id: int | None = None, depth: int = 1
+        session: AsyncSession, name: str, parent_id: int | None = None, depth: int = 1
 ) -> Activity:
     activity = Activity(name=name, parent_id=parent_id, depth=depth)
     session.add(activity)
@@ -14,7 +15,7 @@ async def create_activity(
 
 
 async def get_activity_by_id(
-    session: AsyncSession, activity_id: int
+        session: AsyncSession, activity_id: int
 ) -> Activity | None:
     """Найти деятельность по ID.
 
@@ -25,26 +26,34 @@ async def get_activity_by_id(
     Returns:
         Activity если найдена ровно одна деятельность, иначе None
     """
-    result = await session.execute(select(Activity).filter(Activity.id == activity_id))
+
+    stmt = (
+        select(Activity)
+        .options(joinedload(Activity.parent))
+        .where(Activity.id == activity_id)
+    )
+    result = await session.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def get_activity_by_name(session: AsyncSession, name: str) -> Activity | None:
-    """Найти деятельность по имени.
+async def get_parent_activity_by_name(session: AsyncSession,
+                                      parent_name: str) -> Activity | None:
+    """Найти родительскую деятельность по имени.
 
     Args:
         session: Сессия БД
-        name: Название деятельности
+        parent_name: Название деятельности
 
     Returns:
         Activity если найдена ровно одна деятельность, иначе None
     """
-    result = await session.execute(select(Activity).where(Activity.name.ilike(name)))
+    result = await session.execute(
+        select(Activity).where(Activity.name.ilike(parent_name)))
     return result.scalar_one_or_none()
 
 
 async def get_activity_by_name_and_parent_id(
-    session: AsyncSession, name: str, parent_id: int | None = None
+        session: AsyncSession, name: str, parent_id: int | None = None
 ) -> Activity | None:
     """Найти деятельность по имени и по parent_id.
 
@@ -56,7 +65,11 @@ async def get_activity_by_name_and_parent_id(
     Returns:
         Activity если найдена ровно одна деятельность, иначе None
     """
-    stmt = select(Activity).where(Activity.name.ilike(name))
+    stmt = (
+        select(Activity)
+        .options(joinedload(Activity.parent))
+        .where(Activity.name.ilike(name))
+    )
 
     if parent_id is None:
         stmt = stmt.where(Activity.parent_id.is_(None))
